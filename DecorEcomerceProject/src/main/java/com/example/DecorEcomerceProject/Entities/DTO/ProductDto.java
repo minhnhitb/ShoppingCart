@@ -12,11 +12,11 @@ public class ProductDto {
     private String name;
     @NotNull
     @Min(value = 1, message= "Thiếu loại sản phẩm")
-    private long category;
+    private long category_id;
     private String description;
     @NotEmpty(message = "Thiếu số lượng sản phẩm")
     private int inventory;
     @NotEmpty(message = "Thiếu giá cả")
-    private BigDecimal price;
+    private double price;
     private String imageUrl;
 }

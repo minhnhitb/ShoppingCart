@@ -1,26 +1,39 @@
 package com.example.DecorEcomerceProject.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
-@Data
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "order_items")
+@Data
+@Table(name = "order_item")
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(nullable = false)
+    private Integer quantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    private double price;
+
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column
-    private int quantity;
-    private double price;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
+    public void setPrice(Product product) {
+        this.price = product.getPrice();
+    }
+
+    public double getSubTotal() {
+        return price * quantity;
+    }
 }

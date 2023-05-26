@@ -1,21 +1,18 @@
 package com.example.DecorEcomerceProject.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.List;
-@Data
+
 @Entity
-@Table(name = "carts")
-public class Cart {
+@Data
+public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToMany(mappedBy = "cart")
-    private List<CartItem> cartItems;
+    @OneToMany (fetch = FetchType.LAZY, mappedBy = "voucher")
+    private List<Order> orders;
 }

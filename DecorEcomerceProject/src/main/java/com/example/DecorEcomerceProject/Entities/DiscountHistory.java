@@ -3,22 +3,20 @@ package com.example.DecorEcomerceProject.Entities;
 import lombok.Data;
 
 import javax.persistence.*;
-@Data
+
 @Entity
-@Table(name = "cart_items")
-public class CartItem {
+@Data
+@Table(name = "discounthistories")
+public class DiscountHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private int quantity;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
 }

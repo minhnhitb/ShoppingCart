@@ -22,8 +22,8 @@ public class CategoriesController {
     }
     @GetMapping("/category/{id}")
     public ResponseEntity<?> getCategoryByID(@PathVariable Long id){
-        if(categoryService.getCategoryByID(id) == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category with id "+id+" is not existed !");
+        if(!categoryService.getCategoryByID(id).isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category with id "+id+" is not existed!");
         }else {
             return ResponseEntity.ok().body(categoryService.getCategoryByID(id));
         }

@@ -27,7 +27,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Product createProduct( ProductDto productDto) {
+    public Product createProduct(ProductDto productDto) {
         Product product = new Product();
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
@@ -36,8 +36,8 @@ public class ProductServiceImpl implements IProductService {
         product.setPrice(productDto.getPrice());
         product.setImageUrl(productDto.getImageUrl());
         product.setCreatedAt(new Date());
-        Long categoryId = productDto.getCategory();
-        if(categoryId != null){
+        Long categoryId = productDto.getCategory_id();
+        if(categoryId != 0){
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(()-> new EntityNotFoundException("Category not found"));
             product.setCategory(category);
@@ -62,11 +62,11 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public String deleteProduct(Long id) {
-        Product product = productRepository.findById(id).get();
-        if(product == null){
+        Optional<Product> product = productRepository.findById(id);
+        if(!product.isPresent()){
             return "Cannot find Product " +id;
         }else{
-            productRepository.delete(product);
+            productRepository.delete(product.get());
             return "Product "+id+ " has been deleted !";
         }
     }
@@ -81,8 +81,8 @@ public class ProductServiceImpl implements IProductService {
         product.setPrice(productDto.getPrice());
         product.setImageUrl(productDto.getImageUrl());
         product.setUpdatedAt(new Date());
-        Long categoryId = productDto.getCategory();
-        if(categoryId != null){
+        Long categoryId = productDto.getCategory_id();
+        if(categoryId != 0){
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(()-> new EntityNotFoundException("Category not found"));
             product.setCategory(category);

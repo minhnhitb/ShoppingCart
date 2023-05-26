@@ -23,7 +23,7 @@ public class User {
     private String email;
     @Column(unique = true, nullable = false)
     private String phone;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String address;
 //    @OneToMany(mappedBy = "user")
 //    private List<Order> orders;
