@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Tuple;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class ProductServiceImpl implements IProductService {
-    private ProductRepository productRepository;
-    private CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductServiceImpl(ProductRepository productRepository,CategoryRepository categoryRepository){
         this.productRepository = productRepository;
@@ -35,11 +37,11 @@ public class ProductServiceImpl implements IProductService {
         product.setStatus(ProductStatus.AVAILABLE);
         product.setPrice(productDto.getPrice());
         product.setImageUrl(productDto.getImageUrl());
-        product.setCreatedAt(new Date());
-        Long categoryId = productDto.getCategory_id();
+        product.setCreatedAt(LocalDateTime.now());
+        long categoryId = productDto.getCategory_id();
         if(categoryId != 0){
             Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(()-> new EntityNotFoundException("Category not found"));
+                    .orElseThrow(()-> new EntityNotFoundException("Not found category"));
             product.setCategory(category);
         }
         return productRepository.save(product);
@@ -64,27 +66,28 @@ public class ProductServiceImpl implements IProductService {
     public String deleteProduct(Long id) {
         Optional<Product> product = productRepository.findById(id);
         if(!product.isPresent()){
-            return "Cannot find Product " +id;
+            return "Not found product with id: " +id;
         }else{
             productRepository.delete(product.get());
-            return "Product "+id+ " has been deleted !";
+            return "Product with id "+id+ " has been deleted!";
         }
     }
 
     @Override
     public Product updateProduct(Long id, ProductDto productDto) {
         Product product = productRepository.findById(id).orElse(null);
+        assert product != null;
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setInventory(productDto.getInventory());
-        product.setStatus(ProductStatus.AVAILABLE);
+        product.setStatus(productDto.getStatus());
         product.setPrice(productDto.getPrice());
         product.setImageUrl(productDto.getImageUrl());
-        product.setUpdatedAt(new Date());
-        Long categoryId = productDto.getCategory_id();
+        product.setUpdatedAt(LocalDateTime.now());
+        long categoryId = productDto.getCategory_id();
         if(categoryId != 0){
             Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(()-> new EntityNotFoundException("Category not found"));
+                    .orElseThrow(()-> new EntityNotFoundException("Not found category"));
             product.setCategory(category);
         }
         else {

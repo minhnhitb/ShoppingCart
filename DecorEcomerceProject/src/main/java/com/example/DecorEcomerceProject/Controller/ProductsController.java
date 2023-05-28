@@ -14,21 +14,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class ProductsController {
-    private IProductService productService;
+    private final IProductService productService;
     public ProductsController(IProductService productService){
         this.productService = productService;
     }
     @GetMapping("/products")
     public ResponseEntity<?> getAllProducts() {
         if (productService.getAllProducts().size()==0){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List products is empty!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List product is empty!");
         }
         return ResponseEntity.status(HttpStatus.OK).body(productService.getAllProducts());
     }
     @GetMapping("/products/search")
     public ResponseEntity<?> getAllProductsByKeyword(@RequestParam("keyword") String keyword){
         if(productService.getAllProductsByKeyword(keyword).size() == 0){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List products is empty!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List product is empty!");
         }else{
             return ResponseEntity.ok().body(productService.getAllProductsByKeyword(keyword));
         }
@@ -44,7 +44,7 @@ public class ProductsController {
     @GetMapping("/products/category/{cateId}")
     public ResponseEntity<?> getProductByCateID(@PathVariable Long cateId){
         if(productService.getAllProductByCategoryID(cateId).size() == 0){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List products is empty!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List product is empty!");
         }else{
             return ResponseEntity.ok().body(productService.getAllProductByCategoryID(cateId));
         }
@@ -53,7 +53,7 @@ public class ProductsController {
     public ResponseEntity<?> getProductsByCateIDAndKeyword(@RequestParam("cateID") Long cateID,
                                                        @RequestParam("keyword") String keyword){
         if(productService.getAllProductByCateIDAndKeyword(cateID, keyword).size() == 0){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List products is empty!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List product is empty!");
         }else{
             return ResponseEntity.ok().body(productService.getAllProductByCateIDAndKeyword(cateID, keyword));
         }
@@ -71,9 +71,13 @@ public class ProductsController {
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         return ResponseEntity.ok(productService.deleteProduct(id));
     }
-    @PutMapping("/products/save/{id}")
-    public ResponseEntity<Product> updateBook(@PathVariable Long id, @RequestBody ProductDto productDto) {
-        Product product = productService.updateProduct(id, productDto);
-        return ResponseEntity.ok(product);
+    @PutMapping("/products/edit/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
+        try {
+            Product product = productService.updateProduct(id, productDto);
+            return ResponseEntity.ok(product);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

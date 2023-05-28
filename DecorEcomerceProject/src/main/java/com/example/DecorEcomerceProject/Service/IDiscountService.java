@@ -9,8 +9,10 @@ import java.util.Optional;
 
 public interface IDiscountService {
     Discount createDiscount(DiscountDTO discountDTO);
+    Discount editDiscount(Long id, DiscountDTO discountDTO);
     List<Discount> getAllDiscount();
     Optional<DiscountDTO> getDiscountById(Long id);
     List<Discount> getAllDiscountByProductId(Long id);
+    List<Product> getAllProductByDiscountId(Long id);
 
 }

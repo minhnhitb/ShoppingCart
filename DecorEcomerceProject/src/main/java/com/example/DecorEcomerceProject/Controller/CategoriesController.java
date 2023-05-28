@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class CategoriesController {
-    private ICategoryService categoryService;
+    private final ICategoryService categoryService;
     public CategoriesController(ICategoryService categoryService){
         this.categoryService = categoryService;
     }
@@ -38,7 +38,7 @@ public class CategoriesController {
     }
 
 
-    @PutMapping("/categories/save/{id}")
+    @PutMapping("/categories/edit/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable Long id,
                                                    @RequestBody Category category) {
         category = categoryService.updateCategory(id, category);

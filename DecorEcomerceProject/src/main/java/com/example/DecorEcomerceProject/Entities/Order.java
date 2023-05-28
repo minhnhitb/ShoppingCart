@@ -1,10 +1,10 @@
 package com.example.DecorEcomerceProject.Entities;
 
 import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +15,14 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private OrderStatus status;
+
+    @Column(name = "date_created", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -26,12 +31,14 @@ public class Order {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
+    @ManyToOne
+    @JoinColumn(name = "shipping_address_id")
+    private ShippingAddress shippingAddress;
+
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    private double total;
+    private boolean paymentType;
 
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
-    }
+    private double amount;
 }

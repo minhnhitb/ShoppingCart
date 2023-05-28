@@ -3,7 +3,11 @@ package com.example.DecorEcomerceProject.Controller;
 import com.example.DecorEcomerceProject.Config.PaymentConfig;
 import com.example.DecorEcomerceProject.Entities.DTO.PaymentDTO;
 import com.example.DecorEcomerceProject.Entities.DTO.PaymentResultsDTO;
+import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
+import com.example.DecorEcomerceProject.Entities.Order;
+import com.example.DecorEcomerceProject.Repositories.OrderRepository;
 import com.example.DecorEcomerceProject.ResponseAPI.ResponseObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +22,14 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
+    @Autowired
+    private OrderRepository orderRepository;
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(@RequestBody PaymentDTO paymentDTO) throws IOException {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        long amount = paymentDTO.getAmount() * 100L;
-        String bankCode = "";
-
-        String vnp_TxnRef = PaymentConfig.getRandomNumber(8);
+        long amount = (long) (paymentDTO.getOrder().getAmount() * 100L);
+        String vnp_TxnRef = String.valueOf(paymentDTO.getOrder().getId());
         String vnp_IpAddr = paymentDTO.getIpAddr();
         String vnp_TmnCode = PaymentConfig.vnp_TmnCode;
 
@@ -35,10 +39,6 @@ public class PaymentController {
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode", "VND");
-
-        if (bankCode != null && !bankCode.isEmpty()) {
-            vnp_Params.put("vnp_BankCode", bankCode);
-        }
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
 
@@ -134,6 +134,13 @@ public class PaymentController {
         paymentResultsDTO.setResponseCode(vnp_ResponseCode);
         paymentResultsDTO.setTransactionNo(vnp_TransactionNo);
         paymentResultsDTO.setTransactionStatus(vnp_TransactionStatus);
+        paymentResultsDTO.setTxnRef(vnp_TxnRef);
+        Order order = orderRepository.findById(Long.valueOf(vnp_TxnRef)).get();
+        if (vnp_ResponseCode.equalsIgnoreCase("00")&&vnp_TransactionStatus.equalsIgnoreCase("00")){
+            order.setStatus(OrderStatus.PAID);
+            order = orderRepository.save(order);
+        }
+        paymentResultsDTO.setOrder(order);
         ResponseObject responseObject = new ResponseObject();
         responseObject.setStatus("");
         responseObject.setMessage("");

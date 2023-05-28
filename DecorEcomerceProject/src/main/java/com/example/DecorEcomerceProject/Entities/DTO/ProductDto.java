@@ -1,5 +1,6 @@
 package com.example.DecorEcomerceProject.Entities.DTO;
 
+import com.example.DecorEcomerceProject.Entities.Enum.ProductStatus;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -18,5 +19,6 @@ public class ProductDto {
     private int inventory;
     @NotEmpty(message = "Thiếu giá cả")
     private double price;
+    private ProductStatus status;
     private String imageUrl;
 }

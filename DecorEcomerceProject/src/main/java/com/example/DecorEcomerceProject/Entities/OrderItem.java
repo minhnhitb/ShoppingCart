@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Data
-@Table(name = "order_item")
+@Table(name = "order_items")
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +28,7 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    public void setPrice(Product product) {
-        this.price = product.getPrice();
-    }
-
-    public double getSubTotal() {
-        return price * quantity;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "discountHistory_id")
+    private DiscountHistory discountHistory;
 }

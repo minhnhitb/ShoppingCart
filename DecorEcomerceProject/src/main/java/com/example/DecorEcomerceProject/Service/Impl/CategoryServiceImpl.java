@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements ICategoryService {
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
     public CategoryServiceImpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
@@ -36,10 +36,10 @@ public class CategoryServiceImpl implements ICategoryService {
     public String deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).get();
         if(category == null){
-            return "Cannot find Category " +id;
+            return "Not found category with id:  " +id;
         }else{
             categoryRepository.delete(category);
-            return "Category "+id+ " has been deleted !";
+            return "Category "+id+ " has been deleted!";
         }
     }
 

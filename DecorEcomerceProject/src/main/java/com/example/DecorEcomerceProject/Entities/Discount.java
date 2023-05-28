@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -16,24 +17,21 @@ public class Discount {
     private Long id;
 
     @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date start;
+    private LocalDateTime start;
 
     @Column(name = "end_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date end;
+    private LocalDateTime end;
 
     @Column(name = "usage_limit", nullable = false)
     private int limit;
 
     @Column(name = "discount_percentage", nullable = false)
-    private int discount_percentage;
+    private int discountPercentage;
 
     @Column(name = "discount_amount_max", nullable = false)
-    private int discount_amount_max;
+    private int discountAmountMax;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "discount")
     private List<DiscountHistory> discountHistories;
-
 }

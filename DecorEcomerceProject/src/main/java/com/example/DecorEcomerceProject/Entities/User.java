@@ -1,5 +1,7 @@
 package com.example.DecorEcomerceProject.Entities;
 
+import com.example.DecorEcomerceProject.Entities.Enum.Level;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -25,8 +27,21 @@ public class User {
     private String phone;
     @Column(nullable = false)
     private String address;
+    @Column
+    private int point;
+    @Column
+    private Level level;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "user")
+    private List<VoucherUser> voucherUsers;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "user")
+    private List<ShippingAddress> shippingAddresses;
+
 //    @OneToMany(mappedBy = "user")
-//    private List<Order> orders;
+//    private List<OrderRepository> orders;
 //    @OneToOne(mappedBy = "customer")
 //    private Cart cart;
 
