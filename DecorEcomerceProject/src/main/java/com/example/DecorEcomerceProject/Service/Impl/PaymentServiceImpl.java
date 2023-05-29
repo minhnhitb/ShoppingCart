@@ -1,36 +1,40 @@
-package com.example.DecorEcomerceProject.Controller;
+package com.example.DecorEcomerceProject.Service.Impl;
 
 import com.example.DecorEcomerceProject.Config.PaymentConfig;
-import com.example.DecorEcomerceProject.Entities.DTO.PaymentDTO;
 import com.example.DecorEcomerceProject.Entities.DTO.PaymentResultsDTO;
 import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
+import com.example.DecorEcomerceProject.Entities.Enum.PaymentType;
 import com.example.DecorEcomerceProject.Entities.Order;
 import com.example.DecorEcomerceProject.Repositories.OrderRepository;
 import com.example.DecorEcomerceProject.ResponseAPI.ResponseObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.example.DecorEcomerceProject.Service.IPaymentService;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@RestController
-@RequestMapping("/api/payment")
-public class PaymentController {
-    @Autowired
-    private OrderRepository orderRepository;
-    @PostMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestBody PaymentDTO paymentDTO) throws IOException {
+@Service
+public class PaymentServiceImpl implements IPaymentService {
+    private final OrderRepository orderRepository;
+    public PaymentServiceImpl(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+    @Override
+    public Object createPayment(Order order) throws IOException {
+        ResponseObject responseObject = new ResponseObject();
+        if (order.getPaymentType() == PaymentType.COD) {
+            responseObject.setStatus("");
+            responseObject.setMessage("");
+            responseObject.setData(order);
+            return responseObject;
+        }
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        long amount = (long) (paymentDTO.getOrder().getAmount() * 100L);
-        String vnp_TxnRef = String.valueOf(paymentDTO.getOrder().getId());
-        String vnp_IpAddr = paymentDTO.getIpAddr();
+        long amount = (long) (order.getAmount() * 100L);
+        String vnp_TxnRef = String.valueOf(order.getId());
         String vnp_TmnCode = PaymentConfig.vnp_TmnCode;
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -41,15 +45,8 @@ public class PaymentController {
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
-
-        String locate = paymentDTO.getLocate();
-        if (locate != null && !locate.isEmpty()) {
-            vnp_Params.put("vnp_Locale", locate);
-        } else {
-            vnp_Params.put("vnp_Locale", "vn");
-        }
-        vnp_Params.put("vnp_ReturnUrl", PaymentConfig.vnp_Returnurl);
-        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_Locale", "vn");
+        vnp_Params.put("vnp_ReturnUrl", PaymentConfig.vnp_ReturnUrl);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -87,27 +84,24 @@ public class PaymentController {
         String vnp_SecureHash = PaymentConfig.hmacSHA512(PaymentConfig.vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = PaymentConfig.vnp_PayUrl + "?" + queryUrl;
-        ResponseObject responseObject = new ResponseObject();
         responseObject.setStatus("");
-        responseObject.setMessage("");
-        responseObject.setData(paymentUrl);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        responseObject.setMessage(paymentUrl);
+        responseObject.setData(order);
+        return responseObject;
     }
-    @GetMapping ("/results")
-    public ResponseEntity<?> transaction_results (
-            @RequestParam(value = "vnp_TmnCode") String vnp_TmnCode,
-            @RequestParam(value = "vnp_Amount") String vnp_Amount,
-            @RequestParam(value = "vnp_BankCode") String vnp_BankCode,
-            @RequestParam(value = "vnp_BankTranNo") String vnp_BankTranNo,
-            @RequestParam(value = "vnp_CardType") String vnp_CardType,
-            @RequestParam(value = "vnp_PayDate") String vnp_PayDate,
-            @RequestParam(value = "vnp_OrderInfo") String vnp_OrderInfo,
-            @RequestParam(value = "vnp_TransactionNo") String vnp_TransactionNo,
-            @RequestParam(value = "vnp_ResponseCode") String vnp_ResponseCode,
-            @RequestParam(value = "vnp_TransactionStatus") String vnp_TransactionStatus,
-            @RequestParam(value = "vnp_TxnRef") String vnp_TxnRef,
-            @RequestParam(value = "vnp_SecureHash") String vnp_SecureHash
-    ) throws UnsupportedEncodingException {
+    @Override
+    public Object getResult(String vnp_TmnCode,
+                            String vnp_Amount,
+                            String vnp_BankCode,
+                            String vnp_BankTranNo,
+                            String vnp_CardType,
+                            String vnp_PayDate,
+                            String vnp_OrderInfo,
+                            String vnp_TransactionNo,
+                            String vnp_ResponseCode,
+                            String vnp_TransactionStatus,
+                            String vnp_TxnRef,
+                            String vnp_SecureHash) throws IOException {
         Map<String, String> fields = new HashMap<>();
         fields.put("vnp_TmnCode", URLEncoder.encode(vnp_TmnCode, StandardCharsets.US_ASCII.toString()));
         fields.put("vnp_Amount", URLEncoder.encode(vnp_Amount, StandardCharsets.US_ASCII.toString()));
@@ -122,9 +116,8 @@ public class PaymentController {
         fields.put("vnp_TxnRef", URLEncoder.encode(vnp_TxnRef, StandardCharsets.US_ASCII.toString()));
 
         String signValue = PaymentConfig.hashAllFields(fields);
-        if (signValue.equals(vnp_SecureHash)){
-            signValue = "";
-        }
+        ResponseObject responseObject = new ResponseObject();
+        Order order = orderRepository.findById(Long.valueOf(vnp_TxnRef)).get();
         PaymentResultsDTO paymentResultsDTO = new PaymentResultsDTO();
         paymentResultsDTO.setAmount(vnp_Amount);
         paymentResultsDTO.setBankCode(vnp_BankCode);
@@ -135,16 +128,25 @@ public class PaymentController {
         paymentResultsDTO.setTransactionNo(vnp_TransactionNo);
         paymentResultsDTO.setTransactionStatus(vnp_TransactionStatus);
         paymentResultsDTO.setTxnRef(vnp_TxnRef);
-        Order order = orderRepository.findById(Long.valueOf(vnp_TxnRef)).get();
-        if (vnp_ResponseCode.equalsIgnoreCase("00")&&vnp_TransactionStatus.equalsIgnoreCase("00")){
-            order.setStatus(OrderStatus.PAID);
-            order = orderRepository.save(order);
+        if (signValue.equals(vnp_SecureHash)) {
+            if (vnp_ResponseCode.equalsIgnoreCase("00") && vnp_TransactionStatus.equalsIgnoreCase("00")) {
+                order.setStatus(OrderStatus.PAID);
+                order = orderRepository.save(order);
+                paymentResultsDTO.setOrder(order);
+                responseObject.setStatus("Ok");
+                responseObject.setMessage("Payment Success");
+                responseObject.setData(paymentResultsDTO);
+            }else {
+                paymentResultsDTO.setOrder(order);
+                responseObject.setStatus("Error");
+                responseObject.setMessage("Error");
+                responseObject.setData(paymentResultsDTO);
+            }
+            return responseObject;
         }
-        paymentResultsDTO.setOrder(order);
-        ResponseObject responseObject = new ResponseObject();
-        responseObject.setStatus("");
-        responseObject.setMessage("");
-        responseObject.setData(paymentResultsDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        responseObject.setStatus("Error");
+        responseObject.setMessage("Sign not valid!");
+        responseObject.setData(null);
+        return responseObject;
     }
 }

@@ -1,10 +1,8 @@
 package com.example.DecorEcomerceProject.Service.Impl;
 
-import com.example.DecorEcomerceProject.Controller.PaymentController;
 import com.example.DecorEcomerceProject.Entities.*;
 import com.example.DecorEcomerceProject.Entities.DTO.OrderDTO;
 import com.example.DecorEcomerceProject.Entities.DTO.OrderItemDTO;
-import com.example.DecorEcomerceProject.Entities.DTO.PaymentDTO;
 import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
 import com.example.DecorEcomerceProject.Repositories.DiscountRepository;
 import com.example.DecorEcomerceProject.Repositories.OrderItemRepository;
@@ -18,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements IOrderService {
@@ -25,21 +24,21 @@ public class OrderServiceImpl implements IOrderService {
     private final DiscountRepository discountRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private PaymentController paymentController;
-
-
-    public OrderServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    private final PaymentServiceImpl paymentService;
+    public OrderServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository, PaymentServiceImpl paymentService) {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.paymentService = paymentService;
     }
 
     @Override
     @Transactional
-    public Order createOrder(OrderDTO orderDTO) {
+    public Object createOrder(OrderDTO orderDTO) throws IOException {
         Order order = new Order();
         order.setStatus(OrderStatus.WAITING);
+        order.setPaymentType(orderDTO.getPaymentType());
         order.setCreatedAt(LocalDateTime.now());
         order.setUser(orderDTO.getUser());
         order.setVoucher(orderDTO.getVoucher());
@@ -72,14 +71,16 @@ public class OrderServiceImpl implements IOrderService {
             amount += orderItem.getPrice() * orderItem.getQuantity();
         }
         order.setAmount(amount);
-        if (orderDTO.isPaymentType()){
-            order.setPaymentType(true);
-        }
         order = orderRepository.save(order);
         for (OrderItem orderItem : orderItems) {
             orderItem.setOrder(order);
             orderItemRepository.save(orderItem);
         }
-        return order;
+        return paymentService.createPayment(order);
+    }
+
+    @Override
+    public Optional<Order> getOrderById(Long Id){
+        return orderRepository.findById(Id);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.DecorEcomerceProject.Entities;
 
 import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
+import com.example.DecorEcomerceProject.Entities.Enum.PaymentType;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -38,7 +39,7 @@ public class Order {
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    private boolean paymentType;
+    private PaymentType paymentType;
 
     private double amount;
 }

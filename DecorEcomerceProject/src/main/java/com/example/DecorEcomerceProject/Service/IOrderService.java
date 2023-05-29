@@ -2,10 +2,11 @@ package com.example.DecorEcomerceProject.Service;
 
 import com.example.DecorEcomerceProject.Entities.DTO.OrderDTO;
 import com.example.DecorEcomerceProject.Entities.Order;
-import com.example.DecorEcomerceProject.ResponseAPI.ResponseObject;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public interface IOrderService {
-    Order createOrder(OrderDTO orderDTO) throws IOException;
+    Object createOrder(OrderDTO orderDTO) throws IOException;
+    Optional<Order> getOrderById(Long id);
 }
