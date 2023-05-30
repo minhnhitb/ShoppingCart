@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -22,9 +23,14 @@ public class UsersController {
         return ResponseEntity.ok(users);
     }
     @PostMapping("/add")
-    public ResponseEntity<User> createUser(@Validated @RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity<Object> createUser(@Validated @RequestBody User user) throws Exception {
+        try {
+            Object createdUser = userService.createUser(user);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
     }
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
@@ -41,7 +47,7 @@ public class UsersController {
         User user = userService.getUserByPhone(phone);
         return ResponseEntity.ok(user);
     }
-    @PutMapping("/save/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userUpdate) {
         User user = userService.updateUser(id,userUpdate);
         return ResponseEntity.ok(user);

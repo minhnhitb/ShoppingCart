@@ -10,6 +10,8 @@ public class PaymentConfig {
     public static String vnp_ReturnUrl = "http://localhost:9090/api/order/result";
     public static String vnp_TmnCode = "NVWUQGML";
     public static String vnp_HashSecret = "VJVDYZJTDGQAZGAJUQRZAVKMEZEECJJM";
+    public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+
 
     //Util for VNPAY
     public static String hashAllFields(Map fields) {
@@ -52,6 +54,15 @@ public class PaymentConfig {
         } catch (Exception ex) {
             return "";
         }
+    }
+    public static String getRandomNumber(int len) {
+        Random rnd = new Random();
+        String chars = "0123456789";
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
 }

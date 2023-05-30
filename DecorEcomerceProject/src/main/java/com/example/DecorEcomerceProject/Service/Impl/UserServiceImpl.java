@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 
-public class UserServiceImpl implements IUserService{
+public class UserServiceImpl implements IUserService {
     private final ShippingAddressRepository shippingAddressRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -26,32 +26,35 @@ public class UserServiceImpl implements IUserService{
     }
 
     @Override
-    public User createUser(User user) {
-        user.setName(user.getName());
-        user.setUsername(user.getUsername());
+    public Object createUser(User user) throws Exception {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new Exception("User name "+user.getUsername()+"already exists!");
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new Exception("Email "+user.getEmail()+"already exists!");
+        }
+        if (userRepository.existsByPhone(user.getPhone())) {
+            throw new Exception("Phone number "+user.getPhone()+"already exists!");
+        }
+        user.setId(null);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEmail(user.getEmail());
-        user.setPhone(user.getPhone());
-        user.setAddress(user.getAddress());
         return userRepository.save(user);
     }
 
     @Override
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Not found user with id: " + id));
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Not found user with id: " + id));
     }
 
     @Override
     public User updateUser(Long id, User user) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Not found user with id: " + id));
-        existingUser.setUsername(user.getUsername());
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        existingUser.setEmail(user.getEmail());
-        existingUser.setPhone(user.getPhone());
         existingUser.setAddress(user.getAddress());
+        existingUser.setPoint(user.getPoint());
+        existingUser.setLevel(user.getLevel());
         // Update other fields as necessary
-
         return userRepository.save(existingUser);
     }
 
@@ -59,11 +62,11 @@ public class UserServiceImpl implements IUserService{
     public String deleteUser(Long id) {
         Optional<User> user = userRepository.findById(id);
 
-        if(!user.isPresent()){
-            return "Not found user with id: " +id;
-        }else{
+        if (!user.isPresent()) {
+            return "Not found user with id: " + id;
+        } else {
             userRepository.delete(user.get());
-            return "User with id: "+id+ " has been deleted!";
+            return "User with id: " + id + " has been deleted!";
         }
     }
 
@@ -79,11 +82,11 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public User getUserByPhone(String phone) {
-        return  userRepository.findUserByPhone(phone);
+        return userRepository.findUserByPhone(phone);
     }
 
     @Override
-    public User updateShippingAddress(Long userId, Long ShippingAddressId, ShippingAddress shippingAddress){
+    public User updateShippingAddress(Long userId, Long ShippingAddressId, ShippingAddress shippingAddress) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Not found user!"));
         ShippingAddress address = shippingAddressRepository.findById(ShippingAddressId).orElseThrow(() -> new EntityNotFoundException("Not found address!"));
         address.setActive(false);

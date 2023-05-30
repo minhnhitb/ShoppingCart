@@ -60,10 +60,10 @@ public class DiscountController {
         }
     }
 
-    @PutMapping("/discount/edit/{id}")
+    @PutMapping("/discount/update/{id}")
     public ResponseEntity<?> createDiscount(@Validated @PathVariable Long id, @RequestBody DiscountDTO discountDTO) {
         try {
-            Discount discount = discountService.editDiscount(id, discountDTO);
+            Discount discount = discountService.updateDiscount(id, discountDTO);
             if (discount != null) {
                 return ResponseEntity.ok(discount);
             }

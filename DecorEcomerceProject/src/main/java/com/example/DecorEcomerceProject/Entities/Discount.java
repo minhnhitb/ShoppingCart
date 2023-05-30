@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,7 @@ public class Discount {
     private LocalDateTime end;
 
     @Column(name = "usage_limit", nullable = false)
+    @Min(value = 0)
     private int limit;
 
     @Column(name = "discount_percentage", nullable = false)

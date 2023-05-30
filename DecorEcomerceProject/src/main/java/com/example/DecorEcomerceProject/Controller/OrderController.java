@@ -1,12 +1,16 @@
 package com.example.DecorEcomerceProject.Controller;
 
 import com.example.DecorEcomerceProject.Entities.DTO.OrderDTO;
+import com.example.DecorEcomerceProject.Entities.Enum.OrderStatus;
+import com.example.DecorEcomerceProject.Entities.Order;
 import com.example.DecorEcomerceProject.Service.IOrderService;
 import com.example.DecorEcomerceProject.Service.IPaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 
 @RestController
@@ -20,22 +24,32 @@ public class OrderController {
         this.paymentService = paymentService;
     }
 
-    //    @GetMapping("/list")
-//    public ResponseEntity<?> getAllOrder(){
-//        if (orderService.getAllDiscount().size()==0){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List discount is empty!");
-//        }
-//        return ResponseEntity.status(HttpStatus.OK).body(discountService.getAllDiscount());
-//    }
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllOrder() {
+        if (orderService.getAllOrder().size() == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List order is empty!");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllOrder());
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getAllOrderByUseId(@PathVariable Long id) {
+        if (orderService.getAllOrderByUseId(id).size() == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("List order is empty!");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllOrderByUseId(id));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@Validated @RequestBody OrderDTO orderDTO) {
         try {
             Object order = orderService.createOrder(orderDTO);
             return ResponseEntity.ok(order);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
     @GetMapping("/result")
     public ResponseEntity<?> result(
             @RequestParam(value = "vnp_TmnCode") String vnp_TmnCode,
@@ -53,12 +67,43 @@ public class OrderController {
     ) throws IOException {
         return ResponseEntity.status(HttpStatus.OK).body(paymentService.getResult(vnp_TmnCode, vnp_Amount, vnp_BankCode, vnp_BankTranNo, vnp_CardType, vnp_PayDate, vnp_OrderInfo, vnp_TransactionNo, vnp_ResponseCode, vnp_TransactionStatus, vnp_TxnRef, vnp_SecureHash));
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOrderById(@PathVariable Long id){
-        if(!orderService.getOrderById(id).isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order with id "+id+" is not existed !");
-        }else {
+    public ResponseEntity<?> getOrderById(@PathVariable Long id) {
+        if (!orderService.getOrderById(id).isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order with id " + id + " is not existed !");
+        } else {
             return ResponseEntity.ok().body(orderService.getOrderById(id));
+        }
+    }
+    @PutMapping("/update/{id}") //for admin
+    public ResponseEntity<?> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+        try {
+            Order updatedOrder = orderService.updateOrder(id, order);
+            if (updatedOrder != null) {
+                return ResponseEntity.ok().body(updatedOrder);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Can not update order with id: " + id);
+            }
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+    @PutMapping("/cancel/{id}") //for user
+    public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
+        try {
+            Order updatedOrder = orderService.cancelOrder(id);
+            if (updatedOrder != null) {
+                return ResponseEntity.ok().body(updatedOrder);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Can not cancel order with id: " + id);
+            }
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
