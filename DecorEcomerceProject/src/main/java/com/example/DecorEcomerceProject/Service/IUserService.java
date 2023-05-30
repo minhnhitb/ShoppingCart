@@ -3,10 +3,11 @@ package com.example.DecorEcomerceProject.Service;
 import com.example.DecorEcomerceProject.Entities.ShippingAddress;
 import com.example.DecorEcomerceProject.Entities.User;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface IUserService {
-    User createUser(User user);
+    Object createUser(User user) throws Exception;
     User getUserById(Long id);
     User updateUser(Long id,User user);
     String deleteUser(Long id);

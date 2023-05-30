@@ -52,7 +52,7 @@ public class DiscountServiceImpl implements IDiscountService {
     }
     @Override
     @Transactional
-    public Discount editDiscount(Long id, DiscountDTO discountDTO) {
+    public Discount updateDiscount(Long id, DiscountDTO discountDTO) {
         Discount discount = discountRepository.findById(id).orElse(null);
         assert discount != null;
         if (discount.getStart().isAfter(LocalDateTime.now())) {

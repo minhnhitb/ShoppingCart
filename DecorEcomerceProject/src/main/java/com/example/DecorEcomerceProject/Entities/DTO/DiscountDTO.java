@@ -8,8 +8,6 @@ import java.util.List;
 
 @Data
 public class DiscountDTO {
-
     private Discount discount;
-
     private List<Product> products;
 }

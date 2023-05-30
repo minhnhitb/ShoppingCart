@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class Product {
     private String description;
 
     @Column
+    @Min(value = 0)
     private int inventory;
 
     @Enumerated(EnumType.STRING)

@@ -2,19 +2,14 @@ package com.example.DecorEcomerceProject.Service.Impl;
 
 import com.example.DecorEcomerceProject.Entities.Category;
 import com.example.DecorEcomerceProject.Entities.DTO.ProductDto;
-import com.example.DecorEcomerceProject.Entities.DTO.ProductTopSellerDto;
 import com.example.DecorEcomerceProject.Entities.Enum.ProductStatus;
 import com.example.DecorEcomerceProject.Entities.Product;
 import com.example.DecorEcomerceProject.Repositories.CategoryRepository;
 import com.example.DecorEcomerceProject.Repositories.ProductRepository;
 import com.example.DecorEcomerceProject.Service.IProductService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.Tuple;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -104,7 +99,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<Product> getAllProductByCateIDAndKeyword(Long cateID, String keyword) {
         List<Product> getByKeyword = productRepository.getAllProductsByKeyword(keyword);
-        List<Product> getByCateIDAndKeyword = new ArrayList<Product>();
+        List<Product> getByCateIDAndKeyword = new ArrayList<>();
         for (Product product : getByKeyword){
             if(product.getCategory().getId() == cateID){
                 getByCateIDAndKeyword.add(product);
