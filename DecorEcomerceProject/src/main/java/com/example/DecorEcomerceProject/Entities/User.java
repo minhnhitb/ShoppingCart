@@ -1,34 +1,42 @@
 package com.example.DecorEcomerceProject.Entities;
 
-import lombok.AllArgsConstructor;
+import com.example.DecorEcomerceProject.Entities.Enum.Level;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column( unique = true, nullable = false)
     private String name;
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
+
     @Column( nullable = false)
     private String password;
-    @Column( nullable = false)
+    @Column( unique = true, nullable = false)
     private String email;
-//    @Column(unique = true, nullable = false)
-    @Column
+    @Column(unique = true, nullable = false)
     private String phone;
-    @Column
+    @Column(nullable = false)
     private String address;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Collection<Role> roles;
+    @Column
+    private int point;
+    @Column
+    private Level level;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "user")
+    private List<VoucherUser> voucherUsers;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "user")
+    private List<ShippingAddress> shippingAddresses;
 }
